@@ -109,6 +109,12 @@ userRouter.get("/search/store", user.Search_Store, () => {});
 
 userRouter.get("/order", user.Order, () => {});
 
+userRouter.post("/book/vaccine", user.Book_slot, () => {});
+
+
+
+
+
 userRouter.get("/test", user.test, () => {});
 
 module.exports = userRouter;

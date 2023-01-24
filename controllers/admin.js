@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const config = require("../config/config");
 const Product_Model = require("../model/Products");
 const StaticModal = require("../model/StaticContaint");
-const Order_model = require("../model/order")
+const hospitalModel = require("../model/hospital")
 
  const create_token = (id) => {
     try {
@@ -373,5 +373,57 @@ module.exports = {
             });
         }
     },
+
+    add_hospital: async(request, responce) =>{
+        try {
+            hospitalModel.findOne({Name : request.body.Name}, async(err, result)=>{
+                if (err) {
+                    return await responce.status(400).json({
+                        responseCode: 400,
+                        responsMessage: "server error....!"
+                    });
+                }
+                else if(result) {
+                    return await responce.status(201).json({
+                        responseCode: 101,
+                        responsMessage: "Hospital   allready added.....!"
+                    });
+                }
+                else {
+                    const Hospital_Data = new hospitalModel({
+                        Name: request.body.Name,
+                        city: request.body.city,
+                        pin: request.body.pin,
+                        location: {
+                            coordinates: [parseFloat(request.body.longitude), parseFloat(request.body.latitude)]
+                        },
+                        Active_Hour : {
+                            Time : [parseFloat(request.body.open), parseFloat(request.body.close)]
+                        }
+                    });
+                    hospitalModel(Hospital_Data).save(async(err1, res)=>{
+                        if (err) {
+                            return await responce.status(400).json({
+                                responseCode: 400,
+                                responsMessage: "server error....!"
+                            });
+                        }
+                        else {
+                            return await responce.status(200).json({
+                                responseCode: 200,
+                                responsMessage: "Hospital is added......!",
+                                responsResult : res
+                            });
+                        }
+                    })
+                }
+            })
+        } catch (error) {
+            return await responce.status(500).json({
+                responseCode: 500,
+                responsMessage: "Something went Worng.......!"
+            });
+        }
+    }
     
 };

@@ -29,5 +29,8 @@ adminRouter.get('/get/product', admin.get_Product, () => {
 adminRouter.post('/update/product', admin.update_product, () => {
 });
 
+adminRouter.post('/add/hospital', admin.add_hospital, () => {
+});
+
 
 module.exports = adminRouter;

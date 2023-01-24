@@ -15,6 +15,8 @@ const product_permission_Model = require("../model/User_product_Permission");
 // const Product_Model = require("../model/Admin_Products");
 const Products_store_model = require("../model/ProductStore");
 const Order_model = require("../model/order");
+const hospitalModel = require("../model/hospital")
+const Book_slot_Model = require("../model/BookedCovid")
 
 const create_token = (id) => {
     try {
@@ -1328,6 +1330,111 @@ module.exports = {
             });
         }
     },
+
+    Book_slot: async(request, responce) => {
+        try {
+            hospitalModel.findOne({Name : request.body.hospital_Name}, async(err, result)=> {
+                if (err) {
+                    return await responce.status(400).json({
+                        responseCode: 400,
+                        responsMessage: "Server Error....!",
+                    }); 
+                }
+                else if(result) {
+                    const d = new Date();
+                    let hour = d.getHours();
+                    if(result.open_Time >= hour <= result.close_Time) {
+                        if(result.Dose == 0) {
+                            return await responce.status(201).json({
+                                responseCode: 201,
+                                responsMessage: "Slot is Full...",
+                            });
+                        }
+                        else {
+                            // const datahh = Book_slot_Model.find({})
+                            // console.log(datahh);
+                            Book_slot_Model.findOne({Adhar_Number : request.body.Adhar_Number}, async(errr, result1)=>{
+                                if(errr) {
+                                    return await responce.status(400).json({
+                                        responseCode: 400,
+                                        responsMessage: "Server Error",
+                                    });
+                                }
+                                else if(result1) {
+                                    request.body.H_Name = request.body.hospital_Name;
+                                    const dose = result.Dose - 1; 
+                                    // request.body.Adhar_Number = request.body.Adhar_Number 
+                                    Book_slot_Model(request.body).save(async(err, res)=>{
+                                        if(err) {
+                                            return await responce.status(400).json({
+                                                responseCode: 400,
+                                                responsMessage: "Server Error....!",
+                                            });
+                                        }
+                                        else {
+                                            hospitalModel.findByIdAndUpdate({_id : result._id}, 
+                                                {
+                                                    $set: {
+                                                        Dose : dose
+                                                    }
+                                                },
+                                                { new : true }, async(err1, data) => {
+                                                    if (err1) {
+                                                        return await responce.status(400).json({
+                                                            responseCode: 400,
+                                                            responsMessage: "Server Error....!",
+                                                        });
+                                                    }
+                                                    else if(data) {
+                                                        return await responce.status(200).json({
+                                                            responseCode: 200,
+                                                            responsMessage: "you have booked your slot at "+res.H_Name+"....!",
+                                                            responsResult : res
+                                                        });
+                                                    }
+                                                    else {
+                                                        return await responce.status(201).json({
+                                                            responseCode: 201,
+                                                            responsMessage: "Booking pending...",
+                                                        });
+                                                    }
+                                                })
+                                            
+                                        }
+                                    })
+                                }
+                                else {
+                                    return await responce.status(201).json({
+                                        responseCode: 201,
+                                        responsMessage: "Adhar Number is in Used",
+                                    });
+                                }
+
+                            })
+                        }
+                        
+                    }
+                    else {
+                        return await responce.status(201).json({
+                            responseCode: 201,
+                            responsMessage: "Booking time Close....!",
+                        }); 
+                    }
+                }
+                else {
+                    return await responce.status(404).json({
+                        responseCode: 404,
+                        responsMessage: "Hospital Not Found....!",
+                    });
+                }
+            })
+        } catch (error) {
+            return await responce.status(500).json({
+                responseCode: 500,
+                responsMessage: "Something went worng....!",
+            });
+        }
+    }
 
     
 
