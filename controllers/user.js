@@ -1360,7 +1360,7 @@ module.exports = {
                                         responsMessage: "Server Error",
                                     });
                                 }
-                                else if(result1) {
+                                else if(!result1) {
                                     request.body.H_Name = request.body.hospital_Name;
                                     const dose = result.Dose - 1; 
                                     // request.body.Adhar_Number = request.body.Adhar_Number 
