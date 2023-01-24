@@ -21,6 +21,18 @@ const Booked_Covid = new Schema({
         type : Number,
         // required : true 
     },
+    hour: {
+        type : Number,
+    },
+    minute: {
+        type : Number
+    },
+    month: {
+        type : Number
+    },
+    day : {
+        type : Number
+    }
 
 },{timestamps: true});
 

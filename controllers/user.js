@@ -1331,77 +1331,302 @@ module.exports = {
         }
     },
 
-    Book_slot: async(request, responce) => {
+    Book_slot: async (request, responce) => {
         try {
-            hospitalModel.findOne({Name : request.body.hospital_Name}, async(err, result)=> {
+            hospitalModel.findOne({ Name: request.body.hospital_Name }, async (err, result) => {
                 if (err) {
                     return await responce.status(400).json({
                         responseCode: 400,
                         responsMessage: "Server Error....!",
-                    }); 
+                    });
                 }
-                else if(result) {
+                else if (result) {
                     const d = new Date();
                     let hour = d.getHours();
-                    if(result.open_Time >= hour <= result.close_Time) {
-                        if(result.Dose == 0) {
+                    if (result.open_Time >= hour <= result.close_Time) {
+                        if (result.Dose == 0) {
                             return await responce.status(201).json({
                                 responseCode: 201,
                                 responsMessage: "Slot is Full...",
                             });
                         }
                         else {
-                            // const datahh = Book_slot_Model.find({})
-                            // console.log(datahh);
-                            Book_slot_Model.findOne({Adhar_Number : request.body.Adhar_Number}, async(errr, result1)=>{
-                                if(errr) {
+                            Book_slot_Model.findOne({ Adhar_Number: request.body.Adhar_Number }, async (errr, result1) => {
+                                if (errr) {
                                     return await responce.status(400).json({
                                         responseCode: 400,
                                         responsMessage: "Server Error",
                                     });
                                 }
-                                else if(!result1) {
-                                    request.body.H_Name = request.body.hospital_Name;
-                                    const dose = result.Dose - 1; 
-                                    // request.body.Adhar_Number = request.body.Adhar_Number 
-                                    Book_slot_Model(request.body).save(async(err, res)=>{
-                                        if(err) {
-                                            return await responce.status(400).json({
-                                                responseCode: 400,
-                                                responsMessage: "Server Error....!",
-                                            });
-                                        }
-                                        else {
-                                            hospitalModel.findByIdAndUpdate({_id : result._id}, 
-                                                {
-                                                    $set: {
-                                                        Dose : dose
+                                else if (!result1) {
+                                    // Book_slot_Model.aggregate([
+                                    //     { $match: { "month": request.body.month, "day": request.body.day} }
+                                    // ], async (err, data) => {
+                                    //     if (err) {
+                                    //         return await responce.status(400).json({
+                                    //             responseCode: 400,
+                                    //             responsMessage: "Server Error....!",
+                                    //         });
+                                    //     }
+                                    //     else if (data) {
+                                    //         return await responce.status(500).json({
+                                    //             responseCode: 500,
+                                    //             responsMessage: "SomethingWent Woring....!",
+                                    //         });
+                                    //     }
+                                    //     else {
+                                    //         request.body.H_Name = request.body.hospital_Name;
+                                    //         const dose = result.Dose - 1;
+                                    //         Book_slot_Model(request.body).save(async(err, res)=>{
+                                    //             if(err) {
+                                    //                 return await responce.status(400).json({
+                                    //                     responseCode: 400,
+                                    //                     responsMessage: "Server Error....!",
+                                    //                 });
+                                    //             }
+                                    //             else {
+                                    //                 hospitalModel.findByIdAndUpdate({_id : result._id}, 
+                                    //                     {
+                                    //                         $set: {
+                                    //                             Dose : dose
+                                    //                         }
+                                    //                     },
+                                    //                     { new : true }, async(err1, data) => {
+                                    //                         if (err1) {
+                                    //                             return await responce.status(400).json({
+                                    //                                 responseCode: 400,
+                                    //                                 responsMessage: "Server Error....!",
+                                    //                             });
+                                    //                         }
+                                    //                         else if(data) {
+                                    //                             return await responce.status(200).json({
+                                    //                                 responseCode: 200,
+                                    //                                 responsMessage: "you have booked your slot at "+res.H_Name+"....!",
+                                    //                                 responsResult : res
+                                    //                             });
+                                    //                         }
+                                    //                         else {
+                                    //                             return await responce.status(201).json({
+                                    //                                 responseCode: 201,
+                                    //                                 responsMessage: "Booking pending...",
+                                    //                             });
+                                    //                         }
+                                    //                     })
+
+                                    //             }
+                                    //         })
+                                    //     }
+                                    // });
+                                    if (request.body.hour < 30 && request.body.minute < 60) {
+                                        Book_slot_Model.find({ month: request.body.month }, async (err3, res3) => {
+                                            if (err3) {
+                                                console.log("Server Error");
+                                            }
+                                            else if (res3) {
+                                                Book_slot_Model.find({ day: request.body.day }, async (err4, res4) => {
+                                                    if (err4) {
+                                                        console.log("Server Error...!!");
                                                     }
-                                                },
-                                                { new : true }, async(err1, data) => {
-                                                    if (err1) {
+                                                    else if (res4) {
+                                                        Book_slot_Model.find({ hour: request.body.hour }, async (err5, res5) => {
+                                                            if (err5) {
+                                                                console.log("server error...");
+                                                            }
+                                                            else if (res5) {
+                                                                Book_slot_Model.find({ minute: request.body.minute }, async (err6, res6) => {
+                                                                    if (err6) {
+                                                                        console.log("Server Error....!!");
+                                                                    }
+                                                                    else if (res6) {
+                                                                        return await responce.status(201).json({
+                                                                            responseCode: 201,
+                                                                            responsMessage: "slot is booked...",
+                                                                        });
+                                                                    }
+                                                                    else {
+                                                                        request.body.H_Name = request.body.hospital_Name;
+                                                                        const dose = result.Dose - 1;
+                                                                        Book_slot_Model(request.body).save(async (err, res) => {
+                                                                            if (err) {
+                                                                                return await responce.status(400).json({
+                                                                                    responseCode: 400,
+                                                                                    responsMessage: "Server Error....!",
+                                                                                });
+                                                                            }
+                                                                            else {
+                                                                                hospitalModel.findByIdAndUpdate({ _id: result._id },
+                                                                                    {
+                                                                                        $set: {
+                                                                                            Dose: dose
+                                                                                        }
+                                                                                    },
+                                                                                    { new: true }, async (err1, data) => {
+                                                                                        if (err1) {
+                                                                                            return await responce.status(400).json({
+                                                                                                responseCode: 400,
+                                                                                                responsMessage: "Server Error....!",
+                                                                                            });
+                                                                                        }
+                                                                                        else if (data) {
+                                                                                            return await responce.status(200).json({
+                                                                                                responseCode: 200,
+                                                                                                responsMessage: "you have booked your slot at " + res.H_Name + "....!",
+                                                                                                responsResult: res
+                                                                                            });
+                                                                                        }
+                                                                                        else {
+                                                                                            return await responce.status(201).json({
+                                                                                                responseCode: 201,
+                                                                                                responsMessage: "Booking pending...",
+                                                                                            });
+                                                                                        }
+                                                                                    })
+
+                                                                            }
+                                                                        })
+                                                                    }
+
+                                                                })
+                                                            }
+                                                            else {
+                                                                request.body.H_Name = request.body.hospital_Name;
+                                                                const dose = result.Dose - 1;
+                                                                Book_slot_Model(request.body).save(async (err, res) => {
+                                                                    if (err) {
+                                                                        return await responce.status(400).json({
+                                                                            responseCode: 400,
+                                                                            responsMessage: "Server Error....!",
+                                                                        });
+                                                                    }
+                                                                    else {
+                                                                        hospitalModel.findByIdAndUpdate({ _id: result._id },
+                                                                            {
+                                                                                $set: {
+                                                                                    Dose: dose
+                                                                                }
+                                                                            },
+                                                                            { new: true }, async (err1, data) => {
+                                                                                if (err1) {
+                                                                                    return await responce.status(400).json({
+                                                                                        responseCode: 400,
+                                                                                        responsMessage: "Server Error....!",
+                                                                                    });
+                                                                                }
+                                                                                else if (data) {
+                                                                                    return await responce.status(200).json({
+                                                                                        responseCode: 200,
+                                                                                        responsMessage: "you have booked your slot at " + res.H_Name + "....!",
+                                                                                        responsResult: res
+                                                                                    });
+                                                                                }
+                                                                                else {
+                                                                                    return await responce.status(201).json({
+                                                                                        responseCode: 201,
+                                                                                        responsMessage: "Booking pending...",
+                                                                                    });
+                                                                                }
+                                                                            })
+
+                                                                    }
+                                                                })
+                                                            }
+                                                        })
+                                                    }
+                                                    else {
+                                                        request.body.H_Name = request.body.hospital_Name;
+                                                        const dose = result.Dose - 1;
+                                                        Book_slot_Model(request.body).save(async (err, res) => {
+                                                            if (err) {
+                                                                return await responce.status(400).json({
+                                                                    responseCode: 400,
+                                                                    responsMessage: "Server Error....!",
+                                                                });
+                                                            }
+                                                            else {
+                                                                hospitalModel.findByIdAndUpdate({ _id: result._id },
+                                                                    {
+                                                                        $set: {
+                                                                            Dose: dose
+                                                                        }
+                                                                    },
+                                                                    { new: true }, async (err1, data) => {
+                                                                        if (err1) {
+                                                                            return await responce.status(400).json({
+                                                                                responseCode: 400,
+                                                                                responsMessage: "Server Error....!",
+                                                                            });
+                                                                        }
+                                                                        else if (data) {
+                                                                            return await responce.status(200).json({
+                                                                                responseCode: 200,
+                                                                                responsMessage: "you have booked your slot at " + res.H_Name + "....!",
+                                                                                responsResult: res
+                                                                            });
+                                                                        }
+                                                                        else {
+                                                                            return await responce.status(201).json({
+                                                                                responseCode: 201,
+                                                                                responsMessage: "Booking pending...",
+                                                                            });
+                                                                        }
+                                                                    })
+
+                                                            }
+                                                        })
+                                                    }
+                                                })
+                                            }
+                                            else {
+                                                request.body.H_Name = request.body.hospital_Name;
+                                                const dose = result.Dose - 1;
+                                                Book_slot_Model(request.body).save(async (err, res) => {
+                                                    if (err) {
                                                         return await responce.status(400).json({
                                                             responseCode: 400,
                                                             responsMessage: "Server Error....!",
                                                         });
                                                     }
-                                                    else if(data) {
-                                                        return await responce.status(200).json({
-                                                            responseCode: 200,
-                                                            responsMessage: "you have booked your slot at "+res.H_Name+"....!",
-                                                            responsResult : res
-                                                        });
-                                                    }
                                                     else {
-                                                        return await responce.status(201).json({
-                                                            responseCode: 201,
-                                                            responsMessage: "Booking pending...",
-                                                        });
+                                                        hospitalModel.findByIdAndUpdate({ _id: result._id },
+                                                            {
+                                                                $set: {
+                                                                    Dose: dose
+                                                                }
+                                                            },
+                                                            { new: true }, async (err1, data) => {
+                                                                if (err1) {
+                                                                    return await responce.status(400).json({
+                                                                        responseCode: 400,
+                                                                        responsMessage: "Server Error....!",
+                                                                    });
+                                                                }
+                                                                else if (data) {
+                                                                    return await responce.status(200).json({
+                                                                        responseCode: 200,
+                                                                        responsMessage: "you have booked your slot at " + res.H_Name + "....!",
+                                                                        responsResult: res
+                                                                    });
+                                                                }
+                                                                else {
+                                                                    return await responce.status(201).json({
+                                                                        responseCode: 201,
+                                                                        responsMessage: "Booking pending...",
+                                                                    });
+                                                                }
+                                                            })
+
                                                     }
                                                 })
-                                            
-                                        }
-                                    })
+                                            }
+                                        })
+                                    }
+                                    else {
+                                        return await responce.status(201).json({
+                                            responseCode: 201,
+                                            responsMessage: "invalid Time....",
+                                        });
+                                    }
+
                                 }
                                 else {
                                     return await responce.status(201).json({
@@ -1412,13 +1637,13 @@ module.exports = {
 
                             })
                         }
-                        
+
                     }
                     else {
                         return await responce.status(201).json({
                             responseCode: 201,
                             responsMessage: "Booking time Close....!",
-                        }); 
+                        });
                     }
                 }
                 else {
@@ -1436,7 +1661,7 @@ module.exports = {
         }
     }
 
-    
+
 
 
 
